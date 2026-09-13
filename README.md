@@ -48,6 +48,8 @@ The F13–F24 range provides **12 available substitution slots**, meaning up to 
 
 Any key that is rarely used in normal work — `Insert`, `Home`, `End`, `Pause`, `Scroll Lock`, `Page Up/Down`, the numpad block — is a good candidate for reclaiming.
 
+Mappings aren't fixed to any order — pick any physical key and assign it to whichever F13–F24 slot you want, from the app itself.
+
 ---
 
 ## How It Works
@@ -59,8 +61,19 @@ Any key that is rarely used in normal work — `Insert`, `Home`, `End`, `Pause`,
 | `keybd_event` (`user32.dll`) | Injects the substitute keystroke (a key-down event followed by a key-up event). |
 | `CallNextHookEx` (`user32.dll`) | Passes unhandled keys down the hook chain so the rest of the keyboard behaves normally. |
 | Return value `1` | Consumes the keystroke, preventing it from reaching any application. |
+| `config.json` (next to the exe) | Stores your mappings between runs. Created automatically the first time you add one. |
 
 Only the configured keys are intercepted. Every other key is forwarded untouched.
+
+## Using the app
+
+Run the exe and a small dark window opens with your current mappings.
+
+- **Add mapping** — click it, then press the physical key you want to reclaim. A dropdown of the still-unused F13–F24 keys appears; pick one and confirm.
+- **Double-click a row** to reassign it to a different F13–F24 key at any time.
+- **Remove selected** — deletes a mapping and immediately stops intercepting that key.
+
+Every change takes effect immediately and is saved to `config.json`, so it's still there next time you launch. Up to 12 mappings can exist at once (one per F13–F24 slot).
 
 ---
 
@@ -86,11 +99,11 @@ Publish to a custom location:
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o "D:\Tools\KeyRoute"
 ```
 
-### 2. Configure the target application
+### 2. Add a mapping and configure the target application
 
-In the target application's hotkey settings, bind the desired action to the corresponding **F13–F24** key.
+Run KeyRoute, click **Add mapping**, press the physical key you want to reclaim, and pick which F13–F24 key it should send.
 
-To register the binding, run KeyRoute first, then press your *physical* key while the application is listening for a keybind — it will record the injected substitute.
+Then, in the target application's hotkey settings, bind the desired action — while it's listening for a keybind, press your *physical* key. It will record the substitute KeyRoute is now sending in its place.
 
 ### 3. Run at startup
 
@@ -136,14 +149,12 @@ Keep the executable in a permanent location outside the build directory — the 
 
 **Antivirus software may flag the executable.** Installing a global keyboard hook and injecting keystrokes are the same techniques used by keyloggers. The warning reflects the method, not the behaviour of this tool. An exclusion may be required.
 
-**No user interface yet.** With `WinExe` and no tray icon, the process runs invisibly. To stop it, end `KeyRoute.exe` in Task Manager.
+**No tray icon yet.** Closing the window exits the app and removes the hook. Keep it open (or minimized) while you want your mappings active.
 
 ---
 
 ## Planned
 
 - System tray icon (`NotifyIcon`) with exit and toggle controls
-- Configuration file for key mappings, replacing hardcoded values
 - Optional per-application filtering via `GetForegroundWindow`
 - In-app "run at startup" toggle using the registry `Run` key
-#
